@@ -1,0 +1,4 @@
+﻿  Semsest_work_1.2.cpp
+c:\users\василий\documents\visual studio 2017\projects\semsest_work_1.2\semsest_work_1.2\semsest_work_1.2.cpp(256): warning C4244: -=: преобразование "double" в "int", возможна потеря данных
+  Semsest_work_1.2.vcxproj -> c:\users\василий\documents\visual studio 2017\Projects\Semsest_work_1.2\Debug\Semsest_work_1.2.exe
+  Semsest_work_1.2.vcxproj -> c:\users\василий\documents\visual studio 2017\Projects\Semsest_work_1.2\Debug\Semsest_work_1.2.pdb (Partial PDB)
