@@ -1,4 +1,10 @@
 ﻿  Semsest_work_1.2.cpp
-c:\users\василий\documents\visual studio 2017\projects\semsest_work_1.2\semsest_work_1.2\semsest_work_1.2.cpp(256): warning C4244: -=: преобразование "double" в "int", возможна потеря данных
-  Semsest_work_1.2.vcxproj -> c:\users\василий\documents\visual studio 2017\Projects\Semsest_work_1.2\Debug\Semsest_work_1.2.exe
-  Semsest_work_1.2.vcxproj -> c:\users\василий\documents\visual studio 2017\Projects\Semsest_work_1.2\Debug\Semsest_work_1.2.pdb (Partial PDB)
+c:\users\василий\documents\visual studio 2017\projects\semsest_work_1.2\semsest_work_1.2\semsest_work_1.2.cpp(105): warning C4244: -=: преобразование "double" в "float", возможна потеря данных
+c:\users\василий\documents\visual studio 2017\projects\semsest_work_1.2\semsest_work_1.2\semsest_work_1.2.cpp(148): warning C4244: =: преобразование "double" в "float", возможна потеря данных
+c:\users\василий\documents\visual studio 2017\projects\semsest_work_1.2\semsest_work_1.2\semsest_work_1.2.cpp(149): warning C4244: =: преобразование "double" в "float", возможна потеря данных
+c:\users\василий\documents\visual studio 2017\projects\semsest_work_1.2\semsest_work_1.2\semsest_work_1.2.cpp(150): warning C4244: =: преобразование "double" в "float", возможна потеря данных
+c:\users\василий\documents\visual studio 2017\projects\semsest_work_1.2\semsest_work_1.2\semsest_work_1.2.cpp(154): warning C4244: =: преобразование "float" в "uint8_t", возможна потеря данных
+c:\users\василий\documents\visual studio 2017\projects\semsest_work_1.2\semsest_work_1.2\semsest_work_1.2.cpp(155): warning C4244: =: преобразование "float" в "uint8_t", возможна потеря данных
+c:\users\василий\documents\visual studio 2017\projects\semsest_work_1.2\semsest_work_1.2\semsest_work_1.2.cpp(156): warning C4244: =: преобразование "float" в "uint8_t", возможна потеря данных
+  Semsest_work_1.2.vcxproj -> C:\Users\Василий\Documents\Visual Studio 2017\Projects\Semsest_work_1.2\Debug\Semsest_work_1.2.exe
+  Semsest_work_1.2.vcxproj -> C:\Users\Василий\Documents\Visual Studio 2017\Projects\Semsest_work_1.2\Debug\Semsest_work_1.2.pdb (Partial PDB)

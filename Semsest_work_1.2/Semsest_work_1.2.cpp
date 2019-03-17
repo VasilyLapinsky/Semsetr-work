@@ -41,23 +41,75 @@ struct RGBTRIPLE {
 	uint8_t rgbtRed;
 };
 
-struct HSL {
-	double H;
-	double S;
-	double L;
-};
+float max(float a, float b, float c);
+float min(float a, float b, float c);
 
-void convert_rgb_to_hsl(RGBTRIPLE pixel, HSL &hsl);
-double max(double a, double b, double c);
-double min(double a, double b, double c);
+void fromRGBtoHSL(float rgb[], float hsl[])
+{
+	const float maxRGB = max(rgb[0], rgb[1], rgb[2]);
+	const float minRGB = min(rgb[0], rgb[1], rgb[2]);
+	const float delta2 = maxRGB + minRGB;
+	hsl[2] = delta2 * 0.5f;
 
-void setlight(double power, HSL &hsl);
+	const float delta = maxRGB - minRGB;
+	if (delta < FLT_MIN)
+		hsl[0] = hsl[1] = 0.0f;
+	else
+	{
+		hsl[1] = delta / (hsl[2] > 0.5f ? 2.0f - delta2 : delta2);
+		if (rgb[0] >= maxRGB)
+		{
+			hsl[0] = (rgb[1] - rgb[2]) / delta;
+			if (hsl[0] < 0.0f)
+				hsl[0] += 6.0f;
+		}
+		else if (rgb[1] >= maxRGB)
+			hsl[0] = 2.0f + (rgb[2] - rgb[0]) / delta;
+		else
+			hsl[0] = 4.0f + (rgb[0] - rgb[1]) / delta;
+	}
+}
 
-void convert_hsl_to_rgb(RGBTRIPLE &pixel, HSL hsl);
-void normalization(double &tc);
-double convert_by_color(double p, double q, double tc);
+void fromHSLtoRGB(const float hsl[], float rgb[])
+{
+	if (hsl[1] < FLT_MIN)
+		rgb[0] = rgb[1] = rgb[2] = hsl[2];
+	else if (hsl[2] < FLT_MIN)
+		rgb[0] = rgb[1] = rgb[2] = 0.0f;
+	else
+	{
+		const float q = hsl[2] < 0.5f ? hsl[2] * (1.0f + hsl[1]) : hsl[2] + hsl[1] - hsl[2] * hsl[1];
+		const float p = 2.0f * hsl[2] - q;
+		float t[] = { hsl[0] + 2.0f, hsl[0], hsl[0] - 2.0f };
 
-int setlight_rgb_by_color(double power, int color);
+		for (int i = 0; i<3; ++i)
+		{
+			if (t[i] < 0.0f)
+				t[i] += 6.0f;
+			else if (t[i] > 6.0f)
+				t[i] -= 6.0f;
+
+			if (t[i] < 1.0f)
+				rgb[i] = p + (q - p) * t[i];
+			else if (t[i] < 3.0f)
+				rgb[i] = q;
+			else if (t[i] < 4.0f)
+				rgb[i] = p + (q - p) * (4.0f - t[i]);
+			else
+				rgb[i] = p;
+		}
+	}
+}
+
+void setlight(double power, float hsl[]) {
+	hsl[2] -= power;
+	if (hsl[2] > 1) {
+		hsl[2] = 1;
+	}
+	else if (hsl[2] < 0) {
+		hsl[2] = 0;
+	}
+}
 
 int main()
 {
@@ -90,19 +142,18 @@ int main()
 	double light = 0;
 	cout << "Enter light:";
 	cin >> light;
-	HSL hsl;
+	float rgb[3], hsl[3];
 	for (int i = 0;i < bfi.biHeight;++i) {
 		for (int j = 0;j < bfi.biWidth;++j) {
-			convert_rgb_to_hsl(pixels[i][j], hsl);
-			if (hsl.H != NULL) {
-				setlight(light, hsl);
-				convert_hsl_to_rgb(pixels[i][j], hsl);
-			}
-			else {
-				pixels[i][j].rgbtBlue = setlight_rgb_by_color(light, pixels[i][j].rgbtBlue);
-				pixels[i][j].rgbtGreen = setlight_rgb_by_color(light, pixels[i][j].rgbtGreen);
-				pixels[i][j].rgbtRed = setlight_rgb_by_color(light, pixels[i][j].rgbtRed);
-			}
+			rgb[0] = pixels[i][j].rgbtRed / 255.0;
+			rgb[1] = pixels[i][j].rgbtGreen / 255.0;
+			rgb[2] = pixels[i][j].rgbtBlue / 255.0;
+			fromRGBtoHSL(rgb, hsl);
+			setlight(light, hsl);
+			fromHSLtoRGB(hsl, rgb);
+			pixels[i][j].rgbtRed = rgb[0] * 255;
+			pixels[i][j].rgbtGreen = rgb[1] * 255;
+			pixels[i][j].rgbtBlue = rgb[2] * 255;
 		}
 	}
 
@@ -122,44 +173,7 @@ int main()
 	return 0;
 }
 
-void convert_rgb_to_hsl(RGBTRIPLE Pixel, HSL &hsl) {
-	double r, g, b;
-	// from 0-255 to 0-1
-	b = Pixel.rgbtBlue / 255.0;
-	g = Pixel.rgbtGreen / 255.0;
-	r = Pixel.rgbtRed / 255.0;
-	//set max, min
-	double MAX, MIN;
-	MAX = max(r, g, b);
-	MIN = min(r, g, b);
-	//set L
-	hsl.L = (double)((MAX + MIN) / 2.0);
-	//set H
-	if (MAX == MIN) {
-		hsl.H = NULL;
-	}
-	else if (MAX == r && g >= b) {
-		hsl.H = 60 * (double)((g - b) / (MAX - MIN));
-	}
-	else if (MAX == r && g < b) {
-		hsl.H = 60 * (double)((g - b) / (MAX - MIN)) + 360;
-	}
-	else if (MAX == g) {
-		hsl.H = (double)((b - r) / (MAX - MIN)) + 120;
-	}
-	else if (MAX == b) {
-		hsl.H = 60 * (double)((r - g) / (MAX - MIN)) + 240;
-	}
-	//set S
-	if (hsl.L == 0 || MAX == MIN) {
-		hsl.S = 0;
-	}
-	else if (hsl.L <= 0.5) {
-		hsl.S = double((MAX - MIN) / (MAX + MIN));
-	}
-
-}
-double max(double a, double b, double c) {
+float max(float a, float b, float c) {
 	if (a >= b) {
 		if (a >= c) {
 			return a;
@@ -177,7 +191,7 @@ double max(double a, double b, double c) {
 		}
 	}
 }
-double min(double a, double b, double c) {
+float min(float a, float b, float c) {
 	if (a <= b) {
 		if (a <= c) {
 			return a;
@@ -195,70 +209,4 @@ double min(double a, double b, double c) {
 			return c;
 		}
 	}
-}
-
-void setlight(double power, HSL &hsl) {
-	hsl.L -= power;
-	if (hsl.L > 1) {
-		hsl.L = 1;
-	}
-	else if (hsl.L < 0) {
-		hsl.L = 0;
-	}
-}
-
-void convert_hsl_to_rgb(RGBTRIPLE &pixel, HSL hsl) {
-	double q, p, hk, tr, tg, tb;
-	if (hsl.L < 0.5) {
-		q = hsl.L*(1.0 + hsl.S);
-	}
-	else {
-		q = hsl.L + hsl.S - (hsl.L*hsl.S);
-	}
-	p = 2 * hsl.L - q;
-	hk = hsl.H / 360.0;
-	tr = hk + (1.0 / 3.0);
-	tg = hk;
-	tb = hk - (1.0 / 3.0);
-	//normalize
-	normalization(tr);
-	normalization(tg);
-	normalization(tb);
-	// set colors
-	pixel.rgbtRed = (int)(convert_by_color(p, q, tr) * 255);
-	pixel.rgbtGreen = (int)(convert_by_color(p, q, tg) * 255);
-	pixel.rgbtBlue = (int)(convert_by_color(p, q, tb) * 255);
-}
-void normalization(double &tc) {
-	if (tc < 0) {
-		tc += 1;
-	}
-	else if (tc > 1) {
-		tc -= 1;
-	}
-}
-double convert_by_color(double p, double q, double tc) {
-	if (tc < (1.0 / 6.0)) {
-		return p + (double)((q - p) * 6.0 * tc);
-	}
-	else if (tc < 0.5) {
-		return q;
-	}
-	else if (tc < (1.0 / 3.0)) {
-		return p + ((q - p)*((2.0 / 3.0) - tc) * 6.0);
-	}
-	else {
-		return p;
-	}
-}
-
-int setlight_rgb_by_color(double power, int color) {
-	color -= 255 * power;
-	if (color < 0) {
-		color = 0;
-	}
-	else if (color > 255) {
-		color = 255;
-	}
-	return color;
 }
